@@ -1,17 +1,55 @@
-local Tinkr, wowex = ...
+local Tinkr = ...
+local wowex = {}
+local Util = Tinkr.Util
+local Evaluator = Util.Evaluator
 local Routine = Tinkr.Routine
-local ooo = {}
+
+Tinkr:require('scripts.cromulon.libs.Libdraw.Libs.LibStub.LibStub', wowex) --! If you are loading from disk your rotaiton. 
+Tinkr:require('scripts.cromulon.libs.Libdraw.LibDraw', wowex) 
+Tinkr:require('scripts.cromulon.libs.AceGUI30.AceGUI30', wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-BlizOptionsGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-DropDownGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Frame' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-InlineGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-ScrollFrame' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-SimpleGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TabGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TreeGroup' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Window' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Button' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-CheckBox' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-ColorPicker' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown-Items' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-EditBox' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Heading' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Icon' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-InteractiveLabel' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Keybinding' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Label' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-MultiLineEditBox' , wowex)
+Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Slider' , wowex)
+Tinkr:require('scripts.cromulon.system.configs' , wowex)
+Tinkr:require('scripts.cromulon.libs.libCh0tFqRg.libCh0tFqRg' , wowex)
+Tinkr:require('scripts.cromulon.libs.libNekSv2Ip.libNekSv2Ip' , wowex)
+Tinkr:require('scripts.cromulon.libs.CallbackHandler10.CallbackHandler10' , wowex)
+Tinkr:require('scripts.cromulon.libs.HereBeDragons.HereBeDragons-20' , wowex)
+Tinkr:require('scripts.cromulon.libs.HereBeDragons.HereBeDragons-pins-20' , wowex)
+Tinkr:require('scripts.cromulon.interface.uibuilder' , wowex)
+Tinkr:require('scripts.cromulon.interface.buttons' , wowex)
 
 --A simple solo/farming TBC Retribution Paladin routine
 --Once in-game use /routine load rexret
 
-Routine:RegisterSpellbook({
-    JudgementOfWisdom = 20355,
-
-}, Routine.Classes.Paladin)
+--Buttons Loading
+mybuttons.On = false
+mybuttons.Cooldowns = false
+mybuttons.MultiTarget = false
+mybuttons.Interupts = false
+mybuttons.Settings = false
 
 Routine:RegisterRoutine(function()
-
+    
     --Define resource types if needed
     --local hp = power(PowerType.HolyPower)
 
@@ -20,6 +58,18 @@ Routine:RegisterRoutine(function()
         return 
     end
 
+    function checkdebuff(spellname, unit)
+        local unit = unit or player
+        if not spellname then return false end
+        if (not UnitExists(unit) or UnitIsDeadOrGhost(unit)) then return false end
+        for i = 1, 40 do
+            local _, _, count, _, _, _, _, _, _, spellId, _, _, _, _, _ = UnitDebuff(unit,i)
+            local buffname, _ = GetSpellInfo(spellId)
+            if buffname == spellname then return true end
+        end
+        return false
+    end
+    
     local function in_combat_function()
 
         --Mounted Check
@@ -30,39 +80,93 @@ Routine:RegisterRoutine(function()
         --Target Alive, Target Enemy, Player Alive, Player Not Channeling
         if alive('target') and enemy('target') and alive('player') and not channeling('player') then
 
-            --print (enemiesAround('player'), 8)
-            --Auto Attack
-            --if not IsCurrentSpell(6603) then
-            --    return cast(6603, 'target')
-            --end
-
-            --Seal of Wisdom
-            if castable(SealOfWisdom) and not buff(SealOfWisdom, 'player') and not debuff(20355, 'target') then
-                return cast(SealOfWisdom, 'player')
+            --Bubble Heal in Emergencies
+            local bubblehealhealth = wowex.config.read('bubbleheal', 15)
+            if health('player') <= bubblehealhealth then
+                return cast(DivineShield, 'player')
             end
-            
+            if buff(DivineShield, 'player') and health('player') <= 90 then
+                return cast(HolyLight, 'target')
+            end
+
+            --Seal Management - for when you need to Judge during combat
+            local openseal = wowex.config.read('openseal', 'Wisdom')
+            if openseal ~= 'None' then 
+
+                if openseal == "Command" and not buff(SealOfCommand, 'player') then
+                    return cast(SealOfCommand, 'player')
+                end
+                if openseal == "Crusader" and not buff(SealOfTheCrusader, 'player') and not checkdebuff('Judgement of the Crusader', 'target') then
+                    return cast(SealOfTheCrusader, 'player')
+                end
+                if openseal == "Justice" and not buff(SealOfJustice, 'player') and not checkdebuff('Judgement of Justice', 'target') then
+                    return cast(SealOfJustice, 'player')
+                end
+                if openseal == "Light" and not buff(SealOfLight, 'player') and not checkdebuff('Judgement of Light', 'target') then
+                    return cast(SealOfLight, 'player')
+                end    
+                if openseal == "Righteousness" and not buff(SealOfRighteousness, 'player') then
+                    return cast(SealOfRighteousness, 'player')
+                end
+                if openseal == "Wisdom" and not buff(SealOfWisdom, 'player') and not checkdebuff('Judgement of Wisdom', 'target') then
+                    return cast(SealOfWisdom, 'player')
+                end
+
+            end
+
+            --Judgement of Opening Seal
+            local openseal = wowex.config.read('openseal', 'Wisdom')
+            if openseal ~= 'None' then 
+
+                if openseal == "Command" and buff(SealOfCommand, 'player') then
+                    return cast(Judgement, 'target')
+                end
+                if openseal == "Crusader" and buff(SealOfTheCrusader, 'player') and not checkdebuff('Judgement of the Crusader', 'target') then
+                    return cast(Judgement, 'target')
+                end
+                if openseal == "Justice" and buff(SealOfJustice, 'player') and not checkdebuff('Judgement of Justice', 'target') then
+                    return cast(Judgement, 'target')
+                end
+                if openseal == "Light" and buff(SealOfLight, 'player') and not checkdebuff('Judgement of Light', 'target') then
+                    return cast(Judgement, 'target')
+                end
+                if openseal == "Righteousness" and buff(SealOfRighteousness, 'player') then
+                    return cast(Judgement, 'target')
+                end
+                if openseal == "Wisdom" and buff(SealOfWisdom, 'player') and not checkdebuff('Judgement of Wisdom', 'target') then
+                    return cast(Judgement, 'target')
+                end
+
+            end
+
+            --Seal Management - during combat
+            local combatseal = wowex.config.read('combatseal', 'Command')
+            if combatseal ~= 'None' then 
+
+                if combatseal == "Command" and not buff(SealOfCommand, 'player') then
+                    return cast(SealOfCommand, 'player')
+                end  
+                if combatseal == "Righteousness" and not buff(SealOfRighteousness, 'player') then
+                    return cast(SealOfRighteousness, 'player')
+                end
+
+            end
+
             --Judgement
-            if castable(Judgement) and buff(SealOfWisdom, 'player') and not debuff(20355, 'target') then
-                return cast(Judgement, 'target')
-            end
-
-            --Seal of Command
-            if castable(SealOfCommand) and not buff(SealOfCommand, 'player') and debuff(20355, 'target') then
-                return cast(SealOfCommand, 'player')
-            end
-
-            --Judgement
-            if castable(Judgement) and buff(SealOfCommand, 'player') and debuff(HammerOfJustice, 'target') then
+            local judgementcheck = wowex.config.read('judgeincombat', 'false')
+            if judgementcheck and castable(Judgement) then
                 return cast(Judgement, 'target')
             end
 
             --Crusader Strike
-            if castable(CrusaderStrike) then
+            local crusadercheck = wowex.config.read('crusader', 'true')
+            if crusadercheck and castable(CrusaderStrike) then
                 return cast(CrusaderStrike, 'target')
             end
 
             --Consecration for AOE
-            if castable(Consecration) and enemiesAround('player', 8) >= 2 then
+            local consecrationcheck = wowex.config.read('consecration', 'false')
+            if consecrationcheck and castable(Consecration) and enemiesAround('player', 8) >= 2 then
                 return cast(Consecration)
             end
 
@@ -80,24 +184,84 @@ Routine:RegisterRoutine(function()
         --Target Alive, Target Enemy, Player Alive, Player Not Channeling
         if alive('target') and enemy('target') and alive('player') and not channeling('player') then
 
-            --Seal of Wisdom
-            if castable(SealOfWisdom) and not buff(SealOfWisdom, 'player') and not debuff(20355, 'target') then
-                return cast(SealOfWisdom, 'player')
+            --Seal Management - to open combat with
+            local openseal = wowex.config.read('openseal', 'Wisdom')
+            if openseal ~= 'None' then 
+            
+                if openseal == "Command" and castable(SealOfCommand) and not buff(SealOfCommand, 'player') then
+                    return cast(SealOfCommand, 'player')
+                end
+                if openseal == "Crusader" and castable(SealOfTheCrusader) and not buff(SealOfTheCrusader, 'player') then
+                    return cast(SealOfTheCrusader, 'player')
+                end
+                if openseal == "Justice" and castable(SealOfJustice) and not buff(SealOfJustice, 'player') then
+                    return cast(SealOfJustice, 'player')
+                end
+                if openseal == "Light" and castable(SealOfLight) and not buff(SealOfLight, 'player') then
+                    return cast(SealOfLight, 'player')
+                end
+                if openseal == "Righteousness" and castable(SealOfRighteousness) and not buff(SealOfRighteousness, 'player') then
+                    return cast(SealOfRighteousness, 'player')
+                end
+                if openseal == "Wisdom" and castable(SealOfWisdom) and not buff(SealOfWisdom, 'player') then
+                    return cast(SealOfWisdom, 'player')
+                end
+            
             end
 
         end    
         
         if alive('player') and not channeling('player') then
 
-            --Sanctity Aura
-            if castable(SanctityAura) and not buff(SanctityAura, 'player') then
-                return cast(SanctityAura, 'player')
+            --Aura Management
+            aura = wowex.config.read('aura', 'Sanctity')
+            if aura ~= "None" then
+
+                if aura == "Concentration" and castable(ConcentrationAura) and not buff(ConcentrationAura, 'player') then
+                    return cast(ConcentrationAura, 'player')
+                end
+                if aura == "Crusader" and castable(CrusaderAura) and not buff(CrusaderAura, 'player') then
+                    return cast(CrusaderAura, 'player')
+                end
+                if aura == "Devotion" and castable(DevotionAura) and not buff(DevotionAura, 'player') then
+                    return cast(DevotionAura, 'player')
+                end
+                if aura == "FireRes" and castable(FireResistanceAura) and not buff(FireResistanceAura, 'player') then
+                    return cast(FireResistanceAura, 'player')
+                end
+                if aura == "FrostRes" and castable(FrostResistanceAura) and not buff(FrostResistanceAura, 'player') then
+                    return cast(FrostResistanceAura, 'player')
+                end
+                if aura == "Sanctity" and castable(SanctityAura) and not buff(SanctityAura, 'player') then
+                    return cast(SanctityAura, 'player')
+                end
+                if aura == "ShadowRes" and castable(ShadowResistanceAura) and not buff(ShadowResistanceAura, 'player') then
+                    return cast(ShadowResistanceAura, 'player')
+                end
+            
             end
 
-            --Blessing of Wisdom
-            if castable(BlessingOfWisdom) and not buff(BlessingOfWisdom, 'player') then
-                return cast(BlessingOfWisdom, 'player')
-            end    
+            --Blessings Management
+            blessing = wowex.config.read('blessing', 'Wisdom')
+            if aura ~= "None" then
+
+                if blessing == "Kings" and castable(BlessingOfKings) and not buff(BlessingOfKings, 'player') then
+                    return cast(BlessingOfKings, 'player')
+                end
+                if blessing == "Light" and castable(BlessingOfLight) and not buff(BlessingOfLight, 'player') then
+                    return cast(BlessingOfLight, 'player')
+                end
+                if blessing == "Might" and castable(BlessingOfMight) and not buff(BlessingOfMight, 'player') then
+                    return cast(BlessingOfMight, 'player')
+                end
+                if blessing == "Salvation" and castable(BlessingOfSalvation) and not buff(BlessingOfSalvation, 'player') then
+                    return cast(BlessingOfSalvation, 'player')
+                end
+                if blessing == "Wisdom" and castable(BlessingOfWisdom) and not buff(BlessingOfWisdom, 'player') then
+                    return cast(BlessingOfWisdom, 'player')
+                end
+
+            end 
 
         end
 
@@ -109,222 +273,109 @@ Routine:RegisterRoutine(function()
     else 
         out_of_combat_function()
         return 
-    end 
+    end
 
 end, Routine.Classes.Paladin, 'rexret')
 
---Buttons
---local myButton = CreateFrame("Button", "myFirstButton", UIParent, 'UIPanelButtonTemplate')
---    myButton:SetSize(50,50)
---    myButton:SetPoint("CENTER",200,0)
---    myButton:SetText('ON')
---    myButton:RegisterForClicks("LeftButtonUp")
---    myButton:SetScript("OnClick", function() Tinkr.Routine:Toggle() end)
---    myButton:SetAlpha(1)
---    myButton:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
---    myButton:SetScript("OnLeave", function(self) self:SetAlpha(0.2) end)
+local retpal_settings = {
+    key = "tinkr_configs",
+    title = "Cromulon / Tinkr Platform",
+    width = 600,
+    height = 500,
+    color = "F58CBA",
+    resize = true,
+    show = false,
+    table = {
+        {
+            key = "heading",
+            type = "heading",
+            text = "Rex Retribution Paladin"
+        },
+        {
+            key = "heading",
+            type = "heading",
+            text = "Auras and Blessings"
+        },
+        {
+            key = "aura",
+            width = 200,
+            label = "Aura",
+            text = "Aura to use",
+            type = "dropdown",
+            options = {"Concentration", "Crusader", "Devotion", "FireRes", "FrostRes", "Sanctity", "ShadowRes", "None"}
+        },
+        {
+            key = "blessing",
+            width = 200,
+            label = "Blessing",
+            text = "Blessing to use",
+            type = "dropdown",
+            options = {"Kings", "Light", "Might", "Salvation", "Wisdom", "None"}
+        },
+        {
+            key = "heading",
+            type = "heading",
+            text = "Seals for Opening Combat and During Combat"
+        },
+        {
+            key = "openseal",
+            width = 200,
+            label = "Opening Seal",
+            text = "Seal to open combat",
+            type = "dropdown",
+            options = {"Command", "Crusader", "Justice", "Light", "Righteousness", "Wisdom", "None"}
+        },
+        {
+            key = "combatseal",
+            width = 200,
+            label = "Combat Seal",
+            text = "Seal to use in combat",
+            type = "dropdown",
+            options = {"Command", "Righteousness", "None"}
+        },
+        {
+            key = "heading",
+            type = "heading",
+            text = "Combat Options"
+        },
+        {
+            key = "judgeincombat",
+            type = "checkbox",
+            text = "Judgement",
+            desc = "on CD"
+        },
+        {
+            key = "crusader",
+            type = "checkbox",
+            text = "Crusader Strike",
+            desc = "on CD"
+        },
+        {
+            key = "consecration",
+            type = "checkbox",
+            text = "Consecration",
+            desc = "on CD for AOE"
+        },
+        {
+            key = "heading",
+            type = "heading",
+            text = "Defensives"
+        },
+        {
+            key = "bubbleheal",
+            type = "slider",
+            text = "bubbleheal",
+            label = "Bubble Heal at",
+            min = 1,
+            max = 100,
+            step = 1
+        }
+    }
+}
 
---Buttons Loading
-local mybuttons = {}
-mybuttons = {}
-mybuttons.On = false
-mybuttons.Cooldowns = false
-mybuttons.MultiTarget = false
-mybuttons.Settings = false
-local CreateButton
-do
-  --  Drag Handlers
-  local function OnDragStart(self)
-    self:GetParent():StartMoving()
-  end
-  local function OnDragStop(self)
-    self:GetParent():StopMovingOrSizing()
-  end
+wowex.build_rotation_gui(retpal_settings)
 
-  --  Tooltip Handlers
-  local function OnEnter(self)
-    if self.Tooltip then
-      GameTooltip:SetOwner(self, "ANCHOR_TOP")
-      GameTooltip:AddLine(self.Tooltip, 0, 1, 0.5, 1, 1, 1)
-      GameTooltip:SetWidth(350)
-      GameTooltip:Show()
-    end
-  end
-  local function OnLeave(self)
-    if GameTooltip:IsOwned(self) then
-      GameTooltip:Hide()
-    end
-  end
+local custom_buttons = {
+}
 
-  --  Button Generator (this will be assigned to the upvalue noted as a function prototype)
-  local function CreateButton(parent, name, texture, text, tooltip)
-    tooltip = tooltip or text --  If no tooltip, use button text
-    local btn = CreateFrame("Button", name, parent, "SecureActionButtonTemplate")    --      Create our button
-    btn:SetSize(40, 40)
-    --Setup button text
-    btn:SetNormalFontObject("GameFontNormalSmall") 
-    btn:SetHighlightFontObject("GameFontHighlightSmall")
-    btn:SetDisabledFontObject("GameFontDisableSmall")
-    btn:SetText(text)
-    --Setup button's backgorund, you can use :SetNormalTexture() and other functions to set state-based textures
-    local tex = btn:CreateTexture(nil, "BACKGROUND")
-    tex:SetAllPoints(btn)
-    tex:SetTexture(texture)
-    btn.Texture = tex
-    --Register handlers
-    btn:RegisterForClicks("AnyUp") --   Register all buttons  
-    btn:RegisterForDrag("LeftButton") --    Register for left drag
-    btn:SetScript("OnDragStart", function(self)
-        local f = frame:GetScript("OnDragStart") -- get the frame OnDragStart script
-        f(frame) -- run it
-      end)
-    btn:SetScript("OnDragStop", function(self)
-        local f = frame:GetScript("OnDragStop") -- get the frame OnDragStop script
-        f(frame) -- run it
-      end)
-    btn:SetScript("OnDragStop", OnDragStop)
-    btn:SetScript("OnEnter", OnEnter)
-    btn:SetScript("OnLeave", OnLeave)
-    btn.Tooltip = tooltip
-    --Return our button
-    return btn 
-  end
-end
-
-local frame = CreateFrame("Frame", "wowex_buttons", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-frame:SetSize(180, 50)
-frame:SetBackdrop({
-	bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-	edgeSize = 16,
-	insets = { left = 2, right = 2, top = 2, bottom = 2},
-})
-frame:SetBackdropColor(0, 0, 0, 1)
-frame:EnableMouse(true)
-frame:SetScale(0.8)
-frame:SetMovable(true)
-frame:SetClampedToScreen(true)
-frame:RegisterForDrag("LeftButton") --   Register left button for dragging
-frame:SetScript("OnDragStart", frame.StartMoving) --  Set script for drag start
-frame:SetScript("OnDragStop", frame.StopMovingOrSizing) --    Set script for drag stop
-frame:SetUserPlaced(true)
-
-local CreateButton
-do -- Prototype for function
-  local function OnDragStart(self)   --  Drag Handlers
-    self:GetParent():StartMoving()
-  end
-  local function OnDragStop(self)
-    self:GetParent():StopMovingOrSizing()
-  end
-  local function OnEnter(self) --  Tooltip Handlers
-    if self.Tooltip then
-      GameTooltip:SetOwner(self, "ANCHOR_TOP")
-      GameTooltip:AddLine(self.Tooltip, 0, 1, 0.5, 1, 1, 1)
-      GameTooltip:Show()
-    end
-  end
-  local function OnLeave(self)
-    if GameTooltip:IsOwned(self) then
-      GameTooltip:Hide()
-    end
-  end
-
-  --Button Generator (this will be assigned to the upvalue noted as a function prototype)
-  function CreateButton(parent, name, texture, text, tooltip) 
-    tooltip = tooltip or text --  If no tooltip, use button text
-    local btn = CreateFrame("Button", name, parent, "SecureActionButtonTemplate") --  Button Generator (this will be assigned to the upvalue noted as a function prototype)
-    btn:SetSize(40, 40)
-
-    btn:SetNormalFontObject("GameFontNormalSmall") --      Setup button text
-    btn:SetHighlightFontObject("GameFontHighlightSmall")
-    btn:SetDisabledFontObject("GameFontDisableSmall")
-    btn:SetText(text)
-
-    local tex = btn:CreateTexture(nil, "BACKGROUND") --      Setup button's backgorund, you can use :SetNormalTexture() and other functions to set state-based textures
-    tex:SetAllPoints(btn)
-    tex:SetTexture(texture)
-    btn.Texture = tex
-
-    btn:RegisterForClicks("AnyUp") --   Register all buttons  --      Register handlers
-    btn:RegisterForDrag("LeftButton") --    Register for left drag
-    btn:SetScript("OnDragStart", function(self)
-       local f = frame:GetScript("OnDragStart") -- get the frame OnDragStart script
-        f(frame) -- run it
-      end)
-    btn:SetScript("OnDragStop", function(self)
-        local f = frame:GetScript("OnDragStop") -- get the frame OnDragStop script
-        f(frame) -- run it
-      end    )
-    btn:SetScript("OnDragStop", OnDragStop)
-    btn:SetScript("OnEnter", OnEnter)
-    btn:SetScript("OnLeave", OnLeave)
-    btn.Tooltip = tooltip
-
-    return btn --      Return our button
-  end
-end
-
-local button = CreateButton(frame, "onoff", "Interface\\Icons\\inv_misc_gem_bloodgem_02", nil, "Enable/Disable")
-button:SetPoint("CENTER", wowex_buttons, "LEFT", 25, 0) 
-button:SetScript("OnClick", function()
-    if Routine.enabled == false then
-      -- wowex.wowexStorage.write('rotation_toggle', true)
-      ActionButton_ShowOverlayGlow(onoff)
-      Routine.enabled = true 
-      return
-    else
-      ActionButton_HideOverlayGlow(onoff)
-      -- wowex.wowexStorage.write('rotation_toggle', false)
-      Routine.enabled = false
-      return
-    end
-  end)
-
-local button = CreateButton(frame, "cds", "Interface\\Icons\\inv_misc_pocketwatch_02", nil, "Cooldowns")
-button:SetPoint("TOP", onoff, "TOPRIGHT", 20, 0) 
-button:SetScript("OnClick", function()
-    if mybuttons.Cooldowns == false then
-      ActionButton_ShowOverlayGlow(cds)
-      mybuttons.Cooldowns = true
-      return
-    end
-    if mybuttons.Cooldowns == true then
-      ActionButton_HideOverlayGlow(cds)
-      mybuttons.Cooldowns = false
-      return
-    end
-  end)
-
-local button = CreateButton(frame, "mt", "Interface\\Icons\\spell_holy_prayerofspirit", nil, "MultiTarget")
-button:SetPoint("TOP", cds, "TOPRIGHT", 20, 0) 
-button:SetScript("OnClick", function()
-    if mybuttons.MultiTarget == false then
-      ActionButton_ShowOverlayGlow(mt)
-      mybuttons.MultiTarget = true
-      return
-    end
-    if mybuttons.MultiTarget == true then
-      ActionButton_HideOverlayGlow(mt)
-      mybuttons.MultiTarget = false
-      return
-    end
-  end)
-
-local button = CreateButton(frame, "settings", "Interface\\Icons\\trade_engineering", nil, "Settings")
-button:SetPoint("TOP", mt, "TOPRIGHT", 20, 0) 
-button:SetScript("OnClick", function()
-    if mybuttons.Settings == false then
-      ActionButton_ShowOverlayGlow(settings)
-      mybuttons.Settings = true
-      --rot_panel:Show()
-      return
-    end
-    if mybuttons.Settings == true then
-      ActionButton_HideOverlayGlow(settings)
-      mybuttons.Settings = false
-      --rot_panel:Hide()
-      return
-    end
-  end)
+wowex.button_factory(custom_buttons)
