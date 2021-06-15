@@ -82,11 +82,11 @@ Routine:RegisterRoutine(function()
 
             --Bubble Heal in Emergencies
             local bubblehealhealth = wowex.config.read('bubbleheal', 15)
-            if health('player') <= bubblehealhealth then
+            if health('player') <= bubblehealhealth and not checkdebuff('Forbearance', 'player') then
                 return cast(DivineShield, 'player')
             end
             if buff(DivineShield, 'player') and health('player') <= 90 then
-                return cast(HolyLight, 'target')
+                return cast(HolyLight, 'player')
             end
 
             --Seal Management - for when you need to Judge during combat
