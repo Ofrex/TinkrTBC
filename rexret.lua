@@ -3,32 +3,33 @@ local wowex = {}
 local Util = Tinkr.Util
 local Evaluator = Util.Evaluator
 local Routine = Tinkr.Routine
+local healdelay = 0
 
 Tinkr:require('scripts.cromulon.libs.Libdraw.Libs.LibStub.LibStub', wowex) --! If you are loading from disk your rotaiton. 
 Tinkr:require('scripts.cromulon.libs.Libdraw.LibDraw', wowex) 
-Tinkr:require('scripts.cromulon.libs.AceGUI30.AceGUI30', wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-BlizOptionsGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-DropDownGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Frame' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-InlineGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-ScrollFrame' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-SimpleGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TabGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TreeGroup' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Window' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Button' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-CheckBox' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-ColorPicker' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown-Items' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-EditBox' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Heading' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Icon' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-InteractiveLabel' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Keybinding' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Label' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-MultiLineEditBox' , wowex)
-Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Slider' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.AceGUI30', wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-BlizOptionsGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-DropDownGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Frame' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-InlineGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-ScrollFrame' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-SimpleGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TabGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-TreeGroup' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIContainer-Window' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Button' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-CheckBox' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-ColorPicker' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-DropDown-Items' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-EditBox' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Heading' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Icon' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-InteractiveLabel' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Keybinding' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Label' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-MultiLineEditBox' , wowex)
+ Tinkr:require('scripts.cromulon.libs.AceGUI30.widgets.AceGUIWidget-Slider' , wowex)
 Tinkr:require('scripts.cromulon.system.configs' , wowex)
 Tinkr:require('scripts.cromulon.libs.libCh0tFqRg.libCh0tFqRg' , wowex)
 Tinkr:require('scripts.cromulon.libs.libNekSv2Ip.libNekSv2Ip' , wowex)
@@ -58,6 +59,18 @@ Routine:RegisterRoutine(function()
         return 
     end
 
+    function checkbuff(spellname, unit)
+        local unit = unit or player
+        if not spellname then return false end
+        if (not UnitExists(unit) or UnitIsDeadOrGhost(unit)) then return false end
+        for i = 1, 40 do
+            local _, _, count, _, _, _, _, _, _, spellId, _, _, _, _, _ = UnitBuff(unit,i)
+            local buffname, _ = GetSpellInfo(spellId)
+            if buffname == spellname then return true end
+        end
+        return false
+    end    
+
     function checkdebuff(spellname, unit)
         local unit = unit or player
         if not spellname then return false end
@@ -81,13 +94,25 @@ Routine:RegisterRoutine(function()
         if alive('target') and enemy('target') and alive('player') and not channeling('player') then
 
             --Bubble Heal in Emergencies
+            local bubblehealcheck = wowex.config.read('bubblehealcheck', 'false')
             local bubblehealhealth = wowex.config.read('bubbleheal', 15)
-            if health('player') <= bubblehealhealth and not checkdebuff('Forbearance', 'player') then
+            if bubblehealcheck and health('player') <= bubblehealhealth and not checkdebuff('Forbearance', 'player') then
                 return cast(DivineShield, 'player')
             end
-            if buff(DivineShield, 'player') and health('player') <= 90 then
+            if bubblehealcheck and buff(DivineShield, 'player') and health('player') <= 90 and healdelay < GetTime() then
+                healdelay = GetTime() + 3
                 return cast(HolyLight, 'player')
+            end           
+
+            --Auto Attack
+            if castable(6603, 'target') and not IsCurrentSpell(6603) then
+                return cast(6603, 'target')
             end
+
+            --Holy Shield
+            if castable(HolyShield) and not buff(HolyShield, 'player') then
+                return cast(HolyShield, 'player')
+            end            
 
             --Seal Management - for when you need to Judge during combat
             local openseal = wowex.config.read('openseal', 'Wisdom')
@@ -145,10 +170,16 @@ Routine:RegisterRoutine(function()
 
                 if combatseal == "Command" and not buff(SealOfCommand, 'player') then
                     return cast(SealOfCommand, 'player')
-                end  
+                end
+                if combatseal == "Light" and not buff(SealOfLight, 'player') then
+                    return cast(SealOfLight, 'player')
+                end                  
                 if combatseal == "Righteousness" and not buff(SealOfRighteousness, 'player') then
                     return cast(SealOfRighteousness, 'player')
                 end
+                if combatseal == "Wisdom" and not buff(SealOfWisdom, 'player') then
+                    return cast(SealOfWisdom, 'player')
+                end                  
 
             end
 
@@ -179,7 +210,7 @@ Routine:RegisterRoutine(function()
         --Mounted Check
         if mounted() then
             return
-        end
+        end      
 
         --Target Alive, Target Enemy, Player Alive, Player Not Channeling
         if alive('target') and enemy('target') and alive('player') and not channeling('player') then
@@ -209,9 +240,29 @@ Routine:RegisterRoutine(function()
             
             end
 
+            --Auto Attack
+            if castable(6603, 'target') and not IsCurrentSpell(6603) then
+                return cast(6603, 'target')
+            end
+
         end    
         
-        if alive('player') and not channeling('player') then
+        if alive('player') and not channeling('player') and (not checkbuff('Food', 'player') or not checkbuff('Drink', 'player')) then
+
+            --Holy Light
+            local holylightcheck = wowex.config.read('holylightcheck', 'false')
+            local holylightpercent = wowex.config.read('holylightpercent', 15)
+            if holylightcheck and castable(HolyLight) and health('player') <= holylightpercent and healdelay < GetTime() then
+                healdelay = GetTime() + 3
+                return cast(HolyLight, 'player')
+            end              
+
+            --Buffs
+            --Righteous Fury
+            local mainspec = wowex.config.read('mainspec', 'Retribution')
+            if mainspec == "Protection" and castable(RighteousFury) and not buff(RighteousFury, 'player') then
+                return cast(RighteousFury, 'player')
+            end
 
             --Aura Management
             aura = wowex.config.read('aura', 'Sanctity')
@@ -257,6 +308,9 @@ Routine:RegisterRoutine(function()
                 if blessing == "Salvation" and castable(BlessingOfSalvation) and not buff(BlessingOfSalvation, 'player') then
                     return cast(BlessingOfSalvation, 'player')
                 end
+                if blessing == "Sanctuary" and castable(BlessingOfSanctuary) and not buff(BlessingOfSanctuary, 'player') then
+                    return cast(BlessingOfSanctuary, 'player')
+                end                
                 if blessing == "Wisdom" and castable(BlessingOfWisdom) and not buff(BlessingOfWisdom, 'player') then
                     return cast(BlessingOfWisdom, 'player')
                 end
@@ -280,8 +334,8 @@ end, Routine.Classes.Paladin, 'rexret')
 local retpal_settings = {
     key = "tinkr_configs",
     title = "Cromulon / Tinkr Platform",
-    width = 600,
-    height = 500,
+    width = 450,
+    height = 600,
     color = "F58CBA",
     resize = true,
     show = false,
@@ -289,7 +343,20 @@ local retpal_settings = {
         {
             key = "heading",
             type = "heading",
-            text = "Rex Retribution Paladin"
+            text = "Rex Paladin Combat Rotations"
+        },
+        {
+            key = "heading",
+            type = "heading",
+            text = "Select Main Specialisation"
+        },
+        {
+            key = "mainspec",
+            width = 200,
+            label = "Spec",
+            text = "Spec to use",
+            type = "dropdown",
+            options = {"Protection", "Retribution"}
         },
         {
             key = "heading",
@@ -310,7 +377,7 @@ local retpal_settings = {
             label = "Blessing",
             text = "Blessing to use",
             type = "dropdown",
-            options = {"Kings", "Light", "Might", "Salvation", "Wisdom", "None"}
+            options = {"Kings", "Light", "Might", "Salvation", "Sanctuary", "Wisdom", "None"}
         },
         {
             key = "heading",
@@ -331,7 +398,7 @@ local retpal_settings = {
             label = "Combat Seal",
             text = "Seal to use in combat",
             type = "dropdown",
-            options = {"Command", "Righteousness", "None"}
+            options = {"Command", "Light", "Righteousness", "Wisdom", "None"}
         },
         {
             key = "heading",
@@ -362,6 +429,12 @@ local retpal_settings = {
             text = "Defensives"
         },
         {
+            key = "bubblehealcheck",
+            type = "checkbox",
+            text = "Use Bubble/Heal",
+            desc = "on/off"
+        },
+        {
             key = "bubbleheal",
             type = "slider",
             text = "bubbleheal",
@@ -369,7 +442,22 @@ local retpal_settings = {
             min = 1,
             max = 100,
             step = 1
-        }
+        },
+        {
+            key = "holylightcheck",
+            type = "checkbox",
+            text = "Use Holy Light",
+            desc = "on/off"
+        },
+        {
+            key = "holylightpercent",
+            type = "slider",
+            text = "Holy Light",
+            label = "use at",
+            min = 1,
+            max = 100,
+            step = 1
+        }        
     }
 }
 
